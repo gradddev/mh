@@ -31,3 +31,5 @@ func main() {
 	log.Println(rgbw)
 }
 ```
+
+See `mh_test.go` for various usage examples.
