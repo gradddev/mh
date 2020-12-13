@@ -1,14 +1,16 @@
 package mh_test
 
 import (
-	"github.com/AlexeySemigradsky/mh"
 	"os"
 	"testing"
 	"time"
+
+	"github.com/AlexeySemigradsky/mh"
 )
 
 var address = os.Getenv("DEVICE_ADDRESS")
-var controller = mh.NewController(address)
+var timeout = 3 * time.Second
+var controller = mh.NewController(address, timeout)
 
 func TestController_OpenConnection(t *testing.T) {
 	err := controller.OpenConnection()

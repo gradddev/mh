@@ -2,28 +2,31 @@ package mh
 
 import (
 	"net"
+	"time"
 )
 
 type Request []byte
 type Response []byte
 type Controller struct {
 	Address    string
-	Connection *net.TCPConn
+	Timeout    time.Duration
+	Connection net.Conn
 }
 
-func NewController(address string) *Controller {
+func NewController(address string, timeout time.Duration) *Controller {
 	controller := Controller{
 		Address: address,
+		Timeout: timeout,
 	}
 	return &controller
 }
 
 func (c *Controller) OpenConnection() error {
-	tcpAddr, err := net.ResolveTCPAddr("tcp", c.Address)
-	if err != nil {
-		return err
-	}
-	connection, err := net.DialTCP("tcp", nil, tcpAddr)
+	connection, err := net.DialTimeout(
+		"tcp",
+		c.Address,
+		c.Timeout,
+	)
 	if err != nil {
 		return err
 	}
