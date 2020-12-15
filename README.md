@@ -12,23 +12,28 @@ The first need [Go](https://golang.org/) installed (**version 1.15+ is required*
 $ go get -u github.com/AlexeySemigradsky/mh
 ```
 ## Quick Start
+
 ```go
 package main
 
 import (
-	"github.com/AlexeySemigradsky/mh"
 	"log"
 	"os"
+	"time"
+	
+	"github.com/AlexeySemigradsky/mh"
 )
 
 func main() {
 	address := os.Getenv("DEVICE_ADDRESS")
-	controller := mh.NewController(address)
+	timeout := 3 * time.Second
+	controller := mh.NewController(address, timeout)
 	rgbw, err := controller.GetRGBW()
 	if err != nil {
 		log.Panicln(err)
-	}
-	log.Println(rgbw)
+	} else {
+		log.Println(rgbw)	
+    }
 }
 ```
 
