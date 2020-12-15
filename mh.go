@@ -110,10 +110,7 @@ func (c *Controller) SetPower(power bool) error {
 }
 
 type RGBW struct {
-	Red   uint8
-	Green uint8
-	Blue  uint8
-	White uint8
+	Red, Green, Blue, White float64
 }
 
 func (c *Controller) GetRGBW() (*RGBW, error) {
@@ -122,20 +119,20 @@ func (c *Controller) GetRGBW() (*RGBW, error) {
 		return nil, err
 	}
 	return &RGBW{
-		Red:   state[6],
-		Green: state[7],
-		Blue:  state[8],
-		White: state[9],
+		Red:   float64(state[6]),
+		Green: float64(state[7]),
+		Blue:  float64(state[8]),
+		White: float64(state[9]),
 	}, nil
 }
 
 func (c *Controller) SetRGBW(rgbw *RGBW) error {
 	request := []byte{
 		0x31,
-		rgbw.Red,
-		rgbw.Green,
-		rgbw.Blue,
-		rgbw.White,
+		uint8(rgbw.Red),
+		uint8(rgbw.Green),
+		uint8(rgbw.Blue),
+		uint8(rgbw.White),
 		0x00,
 		0x0f,
 	}
