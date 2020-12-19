@@ -18,22 +18,26 @@ package main
 
 import (
 	"log"
+	"net"
 	"os"
 	"time"
-	
+
 	"github.com/AlexeySemigradsky/mh"
 )
 
 func main() {
-	address := os.Getenv("DEVICE_ADDRESS")
+	ip := net.ParseIP(os.Getenv("DEVICE_IP"))
 	timeout := 3 * time.Second
-	controller := mh.NewController(address, timeout)
+	controller := mh.NewController(mh.Config{
+		IP:      ip,
+		Timeout: timeout,
+	})
 	rgbw, err := controller.GetRGBW()
 	if err != nil {
 		log.Panicln(err)
 	} else {
-		log.Println(rgbw)	
-    }
+		log.Println(rgbw)
+	}
 }
 ```
 
