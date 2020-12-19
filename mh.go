@@ -5,83 +5,26 @@ import (
 	"time"
 )
 
-type Request []byte
-type Response []byte
-type Controller struct {
-	Address    string
-	Timeout    time.Duration
-	Connection net.Conn
+type Config struct {
+	IP      net.IP
+	Timeout time.Duration
 }
 
-func NewController(address string, timeout time.Duration) *Controller {
+type Controller struct {
+	config Config
+}
+
+func NewController(config Config) *Controller {
 	controller := Controller{
-		Address: address,
-		Timeout: timeout,
+		config: config,
 	}
 	return &controller
 }
 
-func (c *Controller) OpenConnection() error {
-	connection, err := net.DialTimeout(
-		"tcp",
-		c.Address,
-		c.Timeout,
-	)
-	if err != nil {
-		return err
-	}
-	c.Connection = connection
-	return nil
-}
-
-func (c *Controller) CloseConnection() error {
-	err := c.Connection.Close()
-	if err != nil {
-		return err
-	}
-	c.Connection = nil
-	return nil
-}
-
-func (c *Controller) SendRequest(request Request, response Response) error {
-	if c.Connection == nil {
-		err := c.OpenConnection()
-		if err != nil {
-			return err
-		}
-	}
-	checksum := calculateChecksum(request)
-	request = append(request, checksum)
-	_, err := c.Connection.Write(request)
-	if err != nil {
-		return err
-	}
-	if response != nil {
-		_, err = c.Connection.Read(response)
-		if err != nil {
-			return err
-		}
-	}
-	err = c.CloseConnection()
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func calculateChecksum(data []byte) byte {
-	checksum := uint8(0)
-	for _, b := range data {
-		checksum += b
-	}
-	checksum &= 0xFF
-	return checksum
-}
-
-func (c *Controller) GetState() (Response, error) {
+func (c *Controller) GetState() ([]byte, error) {
 	request := []byte{0x81, 0x8a, 0x8b}
 	response := make([]byte, 14)
-	err := c.SendRequest(request, response)
+	err := c.sendRequest(request, response)
 	if err != nil {
 		return nil, err
 	}
@@ -102,7 +45,7 @@ func (c *Controller) SetPower(power bool) error {
 	if !power {
 		request[1] = 0x24
 	}
-	err := c.SendRequest(request, nil)
+	err := c.sendRequest(request, nil)
 	if err != nil {
 		return err
 	}
@@ -127,6 +70,10 @@ func (c *Controller) GetRGBW() (*RGBW, error) {
 }
 
 func (c *Controller) SetRGBW(rgbw *RGBW) error {
+	err := c.SetPower(true)
+	if err != nil {
+		return err
+	}
 	request := []byte{
 		0x31,
 		uint8(rgbw.Red),
@@ -136,9 +83,50 @@ func (c *Controller) SetRGBW(rgbw *RGBW) error {
 		0x00,
 		0x0f,
 	}
-	err := c.SendRequest(request, nil)
+	err = c.sendRequest(request, nil)
 	if err != nil {
 		return err
 	}
 	return nil
+}
+
+func (c *Controller) sendRequest(request []byte, response []byte) error {
+	connection, err := net.DialTimeout(
+		"tcp",
+		c.config.IP.String()+":5577",
+		c.config.Timeout,
+	)
+	if err != nil {
+		return err
+	}
+
+	checksum := calculateChecksum(request)
+	request = append(request, checksum)
+	_, err = connection.Write(request)
+	if err != nil {
+		return err
+	}
+
+	if response != nil {
+		_, err = connection.Read(response)
+		if err != nil {
+			return err
+		}
+	}
+
+	err = connection.Close()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func calculateChecksum(data []byte) byte {
+	checksum := uint8(0)
+	for _, b := range data {
+		checksum += b
+	}
+	checksum &= 0xFF
+	return checksum
 }

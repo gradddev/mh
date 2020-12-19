@@ -1,6 +1,7 @@
 package mh_test
 
 import (
+	"net"
 	"os"
 	"testing"
 	"time"
@@ -8,32 +9,12 @@ import (
 	"github.com/AlexeySemigradsky/mh"
 )
 
-var address = os.Getenv("DEVICE_ADDRESS")
+var ip = net.ParseIP(os.Getenv("DEVICE_IP"))
 var timeout = 3 * time.Second
-var controller = mh.NewController(address, timeout)
-
-func TestController_OpenConnection(t *testing.T) {
-	err := controller.OpenConnection()
-	if err != nil {
-		t.Error(err)
-	}
-}
-
-func TestController_CloseConnection(t *testing.T) {
-	err := controller.CloseConnection()
-	if err != nil {
-		t.Error(err)
-	}
-}
-
-func TestController_SendRequest(t *testing.T) {
-	request := []byte{0x81, 0x8a, 0x8b}
-	response := make([]byte, 14)
-	err := controller.SendRequest(request, response)
-	if err != nil {
-		t.Error(err)
-	}
-}
+var controller = mh.NewController(mh.Config{
+	IP:      ip,
+	Timeout: timeout,
+})
 
 func TestController_GetState(t *testing.T) {
 	_, err := controller.GetState()
