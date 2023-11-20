@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/AlexeySemigradsky/mh"
+	"github.com/gradddev/mh"
 )
 
 var ip = net.ParseIP(os.Getenv("DEVICE_IP"))

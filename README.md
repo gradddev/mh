@@ -9,7 +9,7 @@ To install `mh` package, you need to install Go and set your Go workspace first.
 The first need [Go](https://golang.org/) installed (**version 1.15+ is required**), then you can use the below Go command to install `mh`.
 
 ```sh
-$ go get -u github.com/AlexeySemigradsky/mh
+$ go get -u github.com/gradddev/mh
 ```
 ## Quick Start
 
@@ -22,7 +22,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/AlexeySemigradsky/mh"
+	"github.com/gradddev/mh"
 )
 
 func main() {

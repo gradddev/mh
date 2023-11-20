@@ -1,3 +1,3 @@
-module github.com/AlexeySemigradsky/mh
+module github.com/gradddev/mh
 
 go 1.15
